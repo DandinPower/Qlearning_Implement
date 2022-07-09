@@ -86,7 +86,11 @@ class DeepQlearning:
             self.UpdateEpsilon(i)
             if i%5 == 0:
                 print(f'save weight...')
-                self.q.save_weights('taxi_model.h5')
+                self.q.save_weights('../weight/taxi_model.h5')
+    
+    def LoadParameter(self):
+        self.q(10)
+        self.q.load_weights('weight/taxi_model.h5')
     
     def play(self):
         print('start play...')
