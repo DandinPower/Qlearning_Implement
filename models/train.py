@@ -84,7 +84,7 @@ class DeepQlearning:
             print(f'start eposode: {i}')
             self.Episode()
             self.UpdateEpsilon(i)
-            if i%1 == 0:
+            if i%5 == 0:
                 print(f'save weight...')
                 self.q.save_weights('taxi_model.h5')
     
