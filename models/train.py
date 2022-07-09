@@ -31,7 +31,7 @@ class DeepQlearning:
     def UpdateTargetNetwork(self):
         self.targetQ.Copy(self.q)
     
-    def updateEpsilon(self,episode):
+    def UpdateEpsilon(self,episode):
         if self.epsilon > self.epsilon_min:
             self.epsilon = self.epsilon_min+(1-self.epsilon_min)*np.exp(-self.epsilon_decay*episode) 
     
@@ -83,7 +83,10 @@ class DeepQlearning:
         for i in range(_episodeNums):
             print(f'start eposode: {i}')
             self.Episode()
-            self.update_epsilon(i)
+            self.UpdateEpsilon(i)
+            if i%1 == 0:
+                print(f'save weight...')
+                self.q.save_weights('taxi_model.h5')
     
     def play(self):
         print('start play...')
