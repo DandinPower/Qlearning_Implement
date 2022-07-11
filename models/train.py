@@ -15,16 +15,16 @@ def Accuracy(y, y_pred):
 
 class DeepQlearning:
     
-    def __init__(self, _env, _stateNum, _actionNum, _hiddenSize, _batchSize):
+    def __init__(self, _env, _stateNum, _embeddingSize, _actionNum, _hiddenSize, _batchSize):
         self.env = _env
         self.epsilon_decay = 0.01
         self.epsilon_min = 0.001
         self.epsilon = 1
         self.gamma = 0.95
-        self.max_action = 1000
+        self.max_action = 100000
         self.batchSize = _batchSize
-        self.q = QModel(_stateNum, _actionNum, _hiddenSize)
-        self.targetQ = QModel(_stateNum, _actionNum, _hiddenSize)
+        self.q = QModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize)
+        self.targetQ = QModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize)
         self.buffer = ReplayBuffer(2000)
         self.UpdateTargetNetwork()
 
@@ -53,16 +53,15 @@ class DeepQlearning:
         with tf.GradientTape() as tape:
             y_pred = self.q(X)[0]
             loss = mse(y_true=Y, y_pred=y_pred)      
-            #print(f'accuracy: {Accuracy(Y, y_pred)}')
             grads = tape.gradient(loss, self.q.variables)
             optimizer.apply_gradients(grads_and_vars=zip(grads, self.q.variables))
 
-    def Episode(self):
+    def Episode(self, episode):
         st = self.env.reset()
         reward_sum = 0
-        done = False 
         action_nums = 0
         cStep = 0
+        done = False 
         while not done and action_nums < self.max_action:
             at = self.q.GetAction(st, self.epsilon)
             st1, rt, done, info = self.env.step(at)
@@ -77,16 +76,15 @@ class DeepQlearning:
                 cStep += 1
             if cStep % self.batchSize == 0:
                 self.UpdateTargetNetwork()
-            #print(f'Step: {cStep}')
+        print(f'episode:{episode}, reward_sum: {reward_sum}, action_nums: {action_nums}')
     
     def Train(self, _episodeNums):
         for i in range(_episodeNums):
-            print(f'start eposode: {i}')
-            self.Episode()
+            self.Episode(i)
             self.UpdateEpsilon(i)
             if i%5 == 0:
                 print(f'save weight...')
-                self.q.save_weights('../weight/taxi_model.h5')
+                self.q.save_weights('weight/taxi_model.h5')
     
     def LoadParameter(self):
         self.q(10)
@@ -117,12 +115,19 @@ class DeepQlearning:
         self.env.close()
 
 if __name__ == '__main__':
+    '''
     buffer = ReplayBuffer(200)
     for i in range(200):
         buffer.Add(i, 4, i, i, False)
     X = buffer.GetBatchData(20)
     test = DeepQlearning(0, 500, 6, 50, 20)
     X, Y = test.CountBatchTarget(X)
-    test.Train(X,Y)
+    test.Train(X,Y)'''
+    test = DeepQlearning(1, 1, 1, 1, 1)
+    print(test.epsilon)
+    test.UpdateEpsilon(200)
+    print(test.epsilon)
+    test.UpdateEpsilon(200)
+    print(test.epsilon)
 
 

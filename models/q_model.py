@@ -16,13 +16,13 @@ class LinearLayer(tf.keras.layers.Layer):
         return bias
 
 class QModel(tf.keras.Model):
-    def __init__(self, _stateNum, _actionNum, _hiddenSize):
+    def __init__(self, _stateNum, _embeddingSize, _actionNum, _hiddenSize):
         super(QModel, self).__init__()
-        self.embedding = tf.keras.layers.Embedding(input_dim = _stateNum, output_dim = _hiddenSize, input_length = 1)
-        self.dense1 = LinearLayer(_hiddenSize, _hiddenSize)
+        self.embedding = tf.keras.layers.Embedding(input_dim = _stateNum, output_dim = _embeddingSize, input_length = 1)
+        self.dense1 = LinearLayer(_embeddingSize, _hiddenSize)
         self.dense2 = LinearLayer(_hiddenSize, _hiddenSize)
-        self.dense3 = LinearLayer(_hiddenSize, _hiddenSize)
-        self.action = LinearLayer(_hiddenSize, _actionNum)
+        self.dense3 = LinearLayer(_hiddenSize, int(_hiddenSize / 2))
+        self.action = LinearLayer(int(_hiddenSize / 2), _actionNum)
         self.relu = tf.keras.layers.ReLU()
         
     def call(self, inputs):
@@ -46,10 +46,11 @@ class QModel(tf.keras.Model):
             return random.randint(0, 5)
         else:
             q_values = self.call(int(st))[0]
-        return np.argmax(q_values)
+            return np.argmax(q_values)
 
 if __name__ == '__main__':
-    q = QModel(500, 6, 50)
-    targetQ = QModel(500, 6, 50)
-    targetQ.Copy(q)
-    print(targetQ(457))
+    #q = QModel(500, 6, 50)
+    #targetQ = QModel(500, 6, 50)
+    #targetQ.Copy(q)
+    #print(targetQ(457))
+    print(np.random.rand())
