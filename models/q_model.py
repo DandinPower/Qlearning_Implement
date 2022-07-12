@@ -42,7 +42,8 @@ class QModel(tf.keras.Model):
         self.set_weights(parameter)
 
     def GetAction(self, st, epsilon):
-        if random.uniform(0, 1) <= epsilon:
+        #將epsilon 換成0.2
+        if random.uniform(0, 1) <= 0.2:
             return random.randint(0, 5)
         else:
             q_values = self.call(int(st))[0]
