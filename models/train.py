@@ -19,7 +19,7 @@ class DeepQlearning:
         self.env = _env
         self.epsilon_decay = 0.01
         self.epsilon_min = 0.001
-        self.epsilon = 1
+        self.epsilon = 0.2
         self.gamma = 0.618
         self.max_action = 100000
         self.batchSize = _batchSize
@@ -29,6 +29,8 @@ class DeepQlearning:
         self.UpdateTargetNetwork()
 
     def UpdateTargetNetwork(self):
+        self.targetQ(0)
+        self.q(0)
         self.targetQ.Copy(self.q)
     
     def UpdateEpsilon(self,episode):
