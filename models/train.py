@@ -5,6 +5,7 @@ import gym
 import time
 from .q_model import QModel
 from .buffer import ReplayBuffer
+from .draw import History
 def Accuracy(y, y_pred):
     y_total = 0
     y_pred_total = 0
@@ -17,16 +18,16 @@ class DeepQlearning:
     
     def __init__(self, _env, _stateNum, _embeddingSize, _actionNum, _hiddenSize, _batchSize):
         self.env = _env
-        self.epsilon_decay = 0.005
-        self.epsilon_min = 0.05
+        self.epsilon_decay = 0.004
+        self.epsilon_min = 0.1
         self.epsilon = 1
         self.gamma = 0.99
         self.max_action = 100
         self.batchSize = _batchSize
         self.q = QModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize)
         self.targetQ = QModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize)
-        self.buffer = ReplayBuffer(1500)
-        self.history = []
+        self.buffer = ReplayBuffer(2000)
+        self.history = History()
         self.UpdateTargetNetwork()
 
     def UpdateTargetNetwork(self):
@@ -79,7 +80,7 @@ class DeepQlearning:
                 cStep += 1
             if cStep % self.batchSize == 0:
                 self.UpdateTargetNetwork()
-        self.history.append([episode, reward_sum, action_nums, self.epsilon])
+        self.history.AddHistory([episode, reward_sum, action_nums, self.epsilon])
         print(f'episode:{episode}, reward_sum: {reward_sum}, action_nums: {action_nums}, epsilon: {self.epsilon}')
     
     def Train(self, _episodeNums):
@@ -89,7 +90,8 @@ class DeepQlearning:
             if i%100 == 0:
                 print(f'save weight...')
                 self.q.save_weights('weight/taxi_model.h5')
-    
+        self.history.ShowHistory()
+
     def LoadParameter(self):
         self.q(10)
         self.q.load_weights('weight/taxi_model.h5')
