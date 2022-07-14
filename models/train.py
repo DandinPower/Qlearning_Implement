@@ -17,7 +17,7 @@ class DeepQlearning:
     
     def __init__(self, _env, _stateNum, _embeddingSize, _actionNum, _hiddenSize, _batchSize):
         self.env = _env
-        self.epsilon_decay = 0.001
+        self.epsilon_decay = 0.005
         self.epsilon_min = 0.05
         self.epsilon = 1
         self.gamma = 0.99
