@@ -19,10 +19,13 @@ class DeepQlearning:
     def __init__(self, _env, _stateNum, _embeddingSize, _actionNum, _hiddenSize, _batchSize):
         self.env = _env
         self.epsilon_decay = 0.004
+        #讓模型不會發散
         self.epsilon_min = 0.1
         self.epsilon = 1
+        #discount rate 越高約好
         self.gamma = 0.99
         self.max_action = 100
+        self.updateRate = 20
         self.batchSize = _batchSize
         self.q = QModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize)
         self.targetQ = QModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize)
@@ -52,7 +55,7 @@ class DeepQlearning:
         return states, y
     
     def StepTrain(self, X, Y):
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3) 
+        optimizer = tf.keras.optimizers.Adam(learning_rate=5e-4) 
         mse = tf.keras.losses.MeanSquaredError()
         with tf.GradientTape() as tape:
             y_pred = self.q(X)[0]
@@ -78,7 +81,7 @@ class DeepQlearning:
                 X,Y = self.CountBatchTarget(X)
                 self.StepTrain(X, Y)
                 cStep += 1
-            if cStep % self.batchSize == 0:
+            if cStep % self.updateRate == 0:
                 self.UpdateTargetNetwork()
         self.history.AddHistory([episode, reward_sum, action_nums, self.epsilon])
         print(f'episode:{episode}, reward_sum: {reward_sum}, action_nums: {action_nums}, epsilon: {self.epsilon}')
@@ -87,7 +90,7 @@ class DeepQlearning:
         for i in range(_episodeNums):
             self.Episode(i)
             self.UpdateEpsilon(i)
-            if i%100 == 0:
+            if i%1000 == 0:
                 print(f'save weight...')
                 self.q.save_weights('weight/taxi_model.h5')
         self.history.ShowHistory()
