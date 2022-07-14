@@ -18,14 +18,15 @@ class DeepQlearning:
     def __init__(self, _env, _stateNum, _embeddingSize, _actionNum, _hiddenSize, _batchSize):
         self.env = _env
         self.epsilon_decay = 0.01
-        self.epsilon_min = 0.001
-        self.epsilon = 0.2
-        self.gamma = 0.618
-        self.max_action = 100000
+        self.epsilon_min = 0.05
+        self.epsilon = 1
+        self.gamma = 0.99
+        self.max_action = 100
         self.batchSize = _batchSize
         self.q = QModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize)
         self.targetQ = QModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize)
-        self.buffer = ReplayBuffer(2000)
+        self.buffer = ReplayBuffer(1500)
+        self.history = []
         self.UpdateTargetNetwork()
 
     def UpdateTargetNetwork(self):
@@ -78,13 +79,14 @@ class DeepQlearning:
                 cStep += 1
             if cStep % self.batchSize == 0:
                 self.UpdateTargetNetwork()
-        print(f'episode:{episode}, reward_sum: {reward_sum}, action_nums: {action_nums}')
+        self.history.append([episode, reward_sum, action_nums, self.epsilon])
+        print(f'episode:{episode}, reward_sum: {reward_sum}, action_nums: {action_nums}, epsilon: {self.epsilon}')
     
     def Train(self, _episodeNums):
         for i in range(_episodeNums):
             self.Episode(i)
-            #self.UpdateEpsilon(i)
-            if i%5 == 0:
+            self.UpdateEpsilon(i)
+            if i%100 == 0:
                 print(f'save weight...')
                 self.q.save_weights('weight/taxi_model.h5')
     

@@ -21,8 +21,9 @@ class QModel(tf.keras.Model):
         self.embedding = tf.keras.layers.Embedding(input_dim = _stateNum, output_dim = _embeddingSize, input_length = 1)
         self.dense1 = LinearLayer(_embeddingSize, _hiddenSize)
         self.dense2 = LinearLayer(_hiddenSize, _hiddenSize)
-        self.dense3 = LinearLayer(_hiddenSize, int(_hiddenSize / 2))
-        self.action = LinearLayer(int(_hiddenSize / 2), _actionNum)
+        #self.dense3 = LinearLayer(_hiddenSize, int(_hiddenSize / 2))
+        #self.action = LinearLayer(int(_hiddenSize / 2), _actionNum)
+        self.action = LinearLayer(_hiddenSize, _actionNum)
         self.relu = tf.keras.layers.ReLU()
         
     def call(self, inputs):
@@ -32,10 +33,12 @@ class QModel(tf.keras.Model):
         output3 = self.relu(output2)
         output4 = self.dense2(output3)
         output5 = self.relu(output4)
-        output6 = self.dense3(output5)
-        output7 = self.relu(output6)
-        output8 = self.action(output7)
-        return output8 
+        #output6 = self.dense3(output5)
+        #output7 = self.relu(output6)
+        #output8 = self.action(output7)
+        output6 = self.action(output5)
+        #return output8 
+        return output6
 
     def Copy(self, _qModel):
         parameter = _qModel.get_weights()
@@ -56,3 +59,6 @@ if __name__ == '__main__':
     print(q(466))
     targetQ.Copy(q)'''
     pass
+    q = QModel(500, 4, 6, 50)
+    print(q(450))
+    print(q.GetAction(400, 1))
