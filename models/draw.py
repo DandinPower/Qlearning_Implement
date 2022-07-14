@@ -31,7 +31,7 @@ class History:
         fig = plt.figure(1, figsize=(15, 7))
         plt.clf()
         ax1 = fig.add_subplot(111)
-        ax1.set_ylim(-2 * 100, 100 + 10)
+        ax1.set_ylim(-4 * 100, 100 + 10)
         ax1.plot(self.actions, color="C1", alpha=0.2)
         ax1.plot(self.rewards, color="C2", alpha=0.2)
         plt.title('Training...')
