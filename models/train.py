@@ -115,14 +115,13 @@ class DeepQlearning:
             reward_sum += rt
             self.buffer.Add(st, at, rt, st1, done)
             st = st1
+            if episode > self.config.warm_up:
+                self.UpdateLearningRate(episode - self.config.warm_up + 1)
+
             if self.buffer.GetLength() > self.batchSize:
                 X = self.buffer.GetBatchData(self.batchSize)
-                #X,Y = self.CountBatchTarget(X)
-                #self.StepTrain(X, Y)
                 self.Optimize(X)
                 cStep += 1
-            if cStep > self.config.warm_up:
-                self.UpdateLearningRate(cStep - self.config.warm_up + 1)
             if cStep % self.updateRate == 0:
                 self.UpdateTargetNetwork()
         self.history.AddHistory([episode, reward_sum, action_nums, self.epsilon])
