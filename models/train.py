@@ -133,12 +133,12 @@ class DeepQlearning:
         for i in range(total):
             self.Episode(i)
             self.UpdateEpsilon(i)
-            if i%1000 == 0:
+            if i%999 == 0:
                 self.q.save_weights(f'weight/{self.config.name}.h5')
             pBar.update(int((j / (total - 1)) * 100))
             j += 1
-        print(f'cost time: {round(time.time() - startTime,3)} sec')
         pBar.finish()
+        print(f'cost time: {round(time.time() - startTime,3)} sec')
         self.history.ShowHistory(f'figure/{self.config.name}.png')
         
     def LoadParameter(self):
