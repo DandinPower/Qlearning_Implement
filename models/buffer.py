@@ -23,6 +23,6 @@ class ReplayBuffer:
 
 if __name__ == '__main__':
     buffer = ReplayBuffer(200)
-    for i in range(10):
+    for i in range(1000):
         buffer.Add(i, i, i, i, False)
     print(buffer.GetBatchData(20))

@@ -102,6 +102,23 @@ class DeepQlearning:
         y[indices] = rewards + (1 - dones) * 0.99 * q_batch
         self.q.train_on_batch(states.astype(np.float32), y.astype(np.float32))
 
+    def Optimize2(self, batchData):
+        states = np.array([d[0] for d in batchData])
+        actions = np.array([d[1] for d in batchData])
+        rewards = np.array([d[2] for d in batchData])
+        next_states = np.array([d[3] for d in batchData])
+        dones = np.array([d[4] for d in batchData])
+        optimizer = tf.keras.optimizers.Adam(learning_rate=self.current_lr) 
+        with tf.GradientTape() as tape:
+            model_output = self.q(states)
+            target_output = self.targetQ(next_states)
+            predicted_q_value = tf.gather_nd(model_output, tf.expand_dims(actions, 1), 1)
+            next_state_values = tf.math.reduce_max(target_output, axis = 1)
+            expected_q_values = ((1 - dones) * next_state_values * 0.99) + rewards
+            loss = self.loss(expected_q_values, predicted_q_value)    
+            grads = tape.gradient(loss, self.q.variables)
+            optimizer.apply_gradients(grads_and_vars=zip(grads, self.q.variables))
+
     def Episode(self, episode):
         st = self.env.reset()
         reward_sum = 0
@@ -120,7 +137,7 @@ class DeepQlearning:
 
             if self.buffer.GetLength() > self.batchSize:
                 X = self.buffer.GetBatchData(self.batchSize)
-                self.Optimize(X)
+                self.Optimize2(X)
                 cStep += 1
             if cStep % self.updateRate == 0:
                 self.UpdateTargetNetwork()
