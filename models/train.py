@@ -18,6 +18,7 @@ class DeepQlearning:
         self.env = gym.make(_config.gym)
         self.env._max_episode_steps = _config.max_episode_steps
         self.epsilon = _config.epsilon
+        self.epsilon_max = self.epsilon
         self.epsilon_min = _config.epsilon_min
         self.epsilon_decay = _config.epsilon_decay
         self.gamma = _config.gamma
@@ -53,8 +54,9 @@ class DeepQlearning:
 
     ##根據目前的episode調整epsilon
     def UpdateEpsilon(self,episode):
-        if self.epsilon > self.epsilon_min:
-            self.epsilon = self.epsilon_min+(1-self.epsilon_min)*np.exp(-self.epsilon_decay*episode) 
+        delta = self.epsilon_max - self.epsilon_min
+        base = self.epsilon_min
+        self.epsilon = base + delta * np.exp(-episode / self.epsilon_decay)
     
     #初始化模型
     def Compile(self):
