@@ -38,7 +38,7 @@ class QModel(tf.keras.Model):
         #output8 = self.action(output7)
         output6 = self.action(output5)
         #return output8 
-        return output6
+        return output6[0]
 
     def Copy(self, _qModel):
         parameter = _qModel.get_weights()
@@ -48,7 +48,7 @@ class QModel(tf.keras.Model):
         if random.uniform(0, 1) <= epsilon:
             return random.randint(0, 5)
         else:
-            q_values = self.call(int(st))[0]
+            q_values = self.call(int(st))
             return np.argmax(q_values)
 
 if __name__ == '__main__':

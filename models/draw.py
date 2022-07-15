@@ -23,7 +23,7 @@ class History:
         res = (cumsum[periods:] - cumsum[:-periods]) / periods
         return np.hstack([x[:periods-1], res])
     
-    def ShowHistory(self):
+    def ShowHistory(self, path):
         fig = plt.figure(1, figsize=(15, 7))
         plt.clf()
         ax1 = fig.add_subplot(111)
@@ -46,4 +46,5 @@ class History:
         lines.append(ax2.plot(self.epsilon, label="epsilon", color="C3")[0])
         labs = [l.get_label() for l in lines]
         ax1.legend(lines, labs, loc=3)
-        plt.show()
+        plt.savefig(path)
+        #plt.show()
