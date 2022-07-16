@@ -101,16 +101,19 @@ class DeepQlearning:
         reward_sum = 0
         action_nums = 0
         done = False 
-        while not done and action_nums < self.max_action:
+        while not done:
             at = self.GetModelAction(self.q, st, self.epsilon)
             st1, rt, done, info = self.env.step(at)
             action_nums += 1
             reward_sum += rt
             self.buffer.Add(st, at, rt, st1, done)
             st = st1
-            if self.buffer.GetLength() > self.batchSize and episode > self.config.warm_up:
+            if episode > self.config.warm_up:
                 X = self.buffer.GetBatchData(self.batchSize)
                 self.Optimize(X)
+                done = (action_nums == self.max_action - 1) or done
+            else:
+                done = (action_nums == 5 * self.max_action - 1) or done
         self.history.AddHistory([episode, reward_sum, action_nums, self.epsilon])
     
     #將h5參數load進模型

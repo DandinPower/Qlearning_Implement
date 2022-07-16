@@ -48,14 +48,6 @@ def GetQModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize):
 #測試用
 if __name__ == '__main__':
 
-    q = Sequential()
-    q.add(Embedding(500, 4, input_length=1))
-    q.add(Reshape((4,)))
-    q.add(Dense(50, activation='relu'))
-    q.add(Dense(50, activation='relu'))
-    q.add(Dense(6, activation='linear'))
-
-
     '''
     buffer = ReplayBuffer(100)
     for i in range(100):
@@ -72,8 +64,10 @@ if __name__ == '__main__':
     
     #q.save_weights('test.h5')
     q(10)
-    q.load_weights(f'weight/good_v2.h5')
-    q(100)
+    q.load_weights(f'weight/keras_test_2.h5')
+    print(q.trainable_weights)
+    print(q(np.array([50, 100, 150, 200])))
+    #q(100)
     #print(states)
     #print(q.variables)
     #print(q(42))
