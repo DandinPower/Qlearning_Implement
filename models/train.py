@@ -38,6 +38,7 @@ class DeepQlearning:
         self.targetQ = self.GetQModel()
         self.buffer = ReplayBuffer(self.max_queue)
         self.history = History()
+        self.rng = np.random.default_rng(100)
         self.loss = self.GetLossFunction()
         self.UpdateTargetNetwork()
 
@@ -49,6 +50,13 @@ class DeepQlearning:
         model.add(Dense(50, activation='relu'))
         model.add(Dense(6, activation='linear'))
         return model
+    
+    def GetModelAction(self, _model, _st,_epsilon):
+        if self.rng.uniform() < _epsilon:
+            return self.env.action_space.sample()
+        else:
+            q_values = _model(np.array([int(_st)]))
+            return np.argmax(q_values)
 
     #根據config來決定loss function
     def GetLossFunction(self):
@@ -103,7 +111,7 @@ class DeepQlearning:
         cStep = 0
         done = False 
         while not done and action_nums < self.max_action:
-            at = self.q.GetAction(st, self.epsilon)
+            at = self.GetModelAction(self.q, st, self.epsilon)
             st1, rt, done, info = self.env.step(at)
             action_nums += 1
             reward_sum += rt
