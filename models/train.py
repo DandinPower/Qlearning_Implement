@@ -80,7 +80,6 @@ class DeepQlearning:
             expected_q_values = ((1 - dones) * next_state_values * 0.99) + rewards
             loss = self.loss(expected_q_values, model_output)    
             grads = tape.gradient(loss, self.q.variables)
-            print(grads)
             optimizer.apply_gradients(grads_and_vars=zip(grads, self.q.variables))
 
     def Episode(self, episode):
@@ -118,7 +117,7 @@ class DeepQlearning:
         for i in range(total):
             self.Episode(i)
             self.UpdateEpsilon(i)
-            if i%10 == 0:
+            if i%999 == 0:
                 self.q.save_weights(f'weight/{self.config.name}.h5')
             pBar.update(int((j / (total - 1)) * 100))
             j += 1
