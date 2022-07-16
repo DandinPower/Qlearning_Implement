@@ -41,7 +41,6 @@ class DeepQlearning:
         self.loss = self.GetLossFunction()
         self.rng = np.random.default_rng(100)
         
-    
     #跟據state, epsilon以及給定的model來決定action
     def GetModelAction(self, _model, _st,_epsilon):
         if self.rng.uniform() < _epsilon:
@@ -78,6 +77,7 @@ class DeepQlearning:
         base = self.epsilon_min
         self.epsilon = base + delta * np.exp(-episode / self.epsilon_decay)
     
+    #根據抽樣的batchData來train Q模型
     def Optimize(self, batchData):
         states = np.array([d[0] for d in batchData])
         actions = np.array([d[1] for d in batchData])
@@ -90,16 +90,16 @@ class DeepQlearning:
             target_output = self.targetQ(next_states)
             model_output = tf.gather_nd(model_output, tf.expand_dims(actions, 1), 1)
             next_state_values = tf.math.reduce_max(target_output, axis = 1)
-            expected_q_values = ((1 - dones) * next_state_values * 0.99) + rewards
+            expected_q_values = ((1 - dones) * next_state_values * self.gamma) + rewards
             loss = self.loss(expected_q_values, model_output)    
             grads = tape.gradient(loss, self.q.variables)
             optimizer.apply_gradients(grads_and_vars=zip(grads, self.q.variables))
 
+    #每一回合遊戲過程
     def Episode(self, episode):
         st = self.env.reset()
         reward_sum = 0
         action_nums = 0
-        cStep = 0
         done = False 
         while not done and action_nums < self.max_action:
             at = self.GetModelAction(self.q, st, self.epsilon)
@@ -108,18 +108,17 @@ class DeepQlearning:
             reward_sum += rt
             self.buffer.Add(st, at, rt, st1, done)
             st = st1
-            if episode > self.config.warm_up:
-                self.UpdateLearningRate(episode - self.config.warm_up + 1)
-            if self.buffer.GetLength() > self.batchSize:
+            if self.buffer.GetLength() > self.batchSize and episode > self.config.warm_up:
                 X = self.buffer.GetBatchData(self.batchSize)
                 self.Optimize(X)
-                cStep += 1
         self.history.AddHistory([episode, reward_sum, action_nums, self.epsilon])
     
+    #將h5參數load進模型
     def LoadParameter(self):
         self.q(10)
         self.q.load_weights(f'weight/{self.config.loadName}.h5')
     
+    #訓練模型
     def Train(self):
         startTime = time.time()
         j = 0
@@ -128,8 +127,13 @@ class DeepQlearning:
         for i in range(total):
             self.Episode(i)
             self.UpdateEpsilon(i)
+            #每update rate次episodes就更新一次target model
             if i % self.updateRate == 0:
                 self.UpdateTargetNetwork()
+            #超過warm_up的episodes數後每次episode都更新一次learning rate
+            if i > self.config.warm_up:
+                self.UpdateLearningRate(i - self.config.warm_up + 1)
+            #每999個episode就存一次模型參數
             if i%999 == 0:
                 self.q.save_weights(f'weight/{self.config.name}.h5')
             pBar.update(int((j / (total - 1)) * 100))
@@ -138,6 +142,7 @@ class DeepQlearning:
         print(f'cost time: {round(time.time() - startTime,3)} sec')
         self.history.ShowHistory(f'figure/{self.config.name}.png')
         
+    #根據現在的q模型來玩一場遊戲
     def play(self):
         print('start play...')
         observation = self.env.reset()
@@ -162,6 +167,7 @@ class DeepQlearning:
                 observation = self.env.reset()   
         self.env.close()
 
+    #隨機的去遊玩
     def RandomPlay(self, nums):
         rewards = []
         steps = []
@@ -192,15 +198,8 @@ class DeepQlearning:
 
         #self.env.close()
 
+#測試用
 if __name__ == '__main__':
-    '''
-    buffer = ReplayBuffer(200)
-    for i in range(200):
-        buffer.Add(i, 4, i, i, False)
-    X = buffer.GetBatchData(20)
-    test = DeepQlearning(0, 500, 6, 50, 20)
-    X, Y = test.CountBatchTarget(X)
-    test.Train(X,Y)'''
     config = Config()
     dpq = DeepQlearning(config)
     for i in range(150):

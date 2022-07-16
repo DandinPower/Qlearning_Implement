@@ -35,17 +35,7 @@ class QModel(tf.keras.Model):
         x = tf.squeeze(x)
         return x
 
-    def Copy(self, _qModel):
-        parameter = _qModel.get_weights()
-        self.set_weights(parameter)
-
-    def GetAction(self, st, epsilon):
-        if random.uniform(0, 1) <= epsilon:
-            return random.randint(0, 5)
-        else:
-            q_values = self.call(int(st))
-            return np.argmax(q_values)
-
+#回傳用keras sequential製作的模型
 def GetQModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize):
     model = Sequential()
     model.add(Embedding(_stateNum, _embeddingSize, input_length=1))
@@ -55,6 +45,7 @@ def GetQModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize):
     model.add(Dense(_actionNum, activation='linear'))
     return model
 
+#測試用
 if __name__ == '__main__':
 
     q = Sequential()
