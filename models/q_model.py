@@ -27,10 +27,8 @@ class QModel(tf.keras.Model):
     def call(self, inputs):
         x = self.embedding(inputs)
         x = tf.expand_dims(x, 0)
-        
         x = self.dense1(x)
         x = self.relu(x)
-        print(x)
         x = self.dense2(x)
         x = self.relu(x)
         x = self.action(x)
