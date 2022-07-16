@@ -7,9 +7,9 @@ from tensorflow.keras.layers import Dense, Embedding, Reshape
 class LinearLayer(tf.keras.layers.Layer):
     def __init__(self, input_dim,output_dim):
         super().__init__()
-        self.w = self.add_weight(
+        self.w = self.add_weight(name = "w",
             shape=[input_dim, output_dim], initializer="random_normal", trainable = True)
-        self.b = self.add_weight(
+        self.b = self.add_weight(name = "b",
             shape=[output_dim], initializer="random_normal", trainable = True)
 
     def call(self, inputs):
@@ -56,8 +56,8 @@ if __name__ == '__main__':
     q.add(Dense(6, activation='linear'))
 
 
-
-    #buffer = ReplayBuffer(100)
+    '''
+    buffer = ReplayBuffer(100)
     for i in range(100):
         buffer.Add(i, i, i, i, False)
     batchData = buffer.GetBatchData(20)
@@ -65,11 +65,12 @@ if __name__ == '__main__':
     actions = np.array([d[1] for d in batchData])
     rewards = np.array([d[2] for d in batchData])
     next_states = np.array([d[3] for d in batchData])
-    dones = np.array([d[4] for d in batchData])
+    dones = np.array([d[4] for d in batchData])'''
     q = QModel(500, 4, 6, 50)
     target = QModel(500, 4, 6, 50)
     #print(q.trainable_weights)
-    #q(10)
+    q(10)
+    q.save_weights('test.h5')
     #q.load_weights(f'weight/good_v2.h5')
     #print(states)
     #print(q.variables)
