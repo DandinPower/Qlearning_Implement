@@ -8,7 +8,7 @@ import time
 
 config = Config()
 dpq = DeepQlearning(config)
-#dpq.LoadParameter()
-dpq.Train()
-#dpq.play()
+dpq.LoadParameter()
+#dpq.Train()
+dpq.play()
 #dpq.RandomPlay(30)
