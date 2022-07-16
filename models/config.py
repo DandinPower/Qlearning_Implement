@@ -5,6 +5,7 @@ load_dotenv()
 class Config:
     def __init__(self):
         self.name = os.getenv("NAME")
+        self.lossName = os.getenv("LOSS_NAME")
         self.episodes = int(os.getenv("EPISODES"))
         self.warm_up = int(os.getenv("WARMUP_EPISODE"))
         self.loadName = os.getenv("LOAD_WEIGHT")

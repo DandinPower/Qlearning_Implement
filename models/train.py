@@ -26,17 +26,25 @@ class DeepQlearning:
         self.updateRate = _config.updateRate
         self.lr = _config.lr
         self.lr_min = _config.lr_min
+        self.lr_max = _config.lr
         self.lr_decay = _config.lr_decay
-        self.current_lr = self.lr
         self.max_queue = _config.max_queue
         self.batchSize = _config.batchSize
         self.q = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
         self.targetQ = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
         self.buffer = ReplayBuffer(self.max_queue)
         self.history = History()
-        self.loss = tf.keras.losses.Huber()
+        self.loss = self.GetLossFunction()
         self.UpdateTargetNetwork()
-        self.Compile()
+
+    #根據config來決定loss function
+    def GetLossFunction(self):
+        if self.config.lossName == "Mse":
+            return tf.keras.losses.MeanSquaredError()
+        elif self.config.lossName == "Huber":
+            return tf.keras.losses.Huber()
+        else:
+            return tf.keras.losses.Huber()
 
     #將model複製給target model
     def UpdateTargetNetwork(self):
@@ -46,11 +54,10 @@ class DeepQlearning:
     
     #根據目前的episode調整leaning_rate
     def UpdateLearningRate(self, episode):
-        delta = self.lr - self.lr_min
+        delta = self.lr_max - self.lr_min
         base = self.lr_min
         rate = self.lr_decay
-        self.current_lr = base + delta * np.exp(-episode / rate)
-        K.set_value(self.q.optimizer.learning_rate, self.current_lr)
+        self.lr = base + delta * np.exp(-episode / rate)
 
     ##根據目前的episode調整epsilon
     def UpdateEpsilon(self,episode):
@@ -58,65 +65,22 @@ class DeepQlearning:
         base = self.epsilon_min
         self.epsilon = base + delta * np.exp(-episode / self.epsilon_decay)
     
-    #初始化模型
-    def Compile(self):
-        optimizer = tf.keras.optimizers.Adam(learning_rate=self.current_lr) 
-        self.targetQ.compile(optimizer='sgd', loss='mse')
-        self.q.compile(loss=self.loss,optimizer=optimizer,metrics=['accuracy'])
-
-    def CountBatchTarget(self, batchData):
-        states = np.array([d[0] for d in batchData])
-        actions = np.array([d[1] for d in batchData])
-        rewards = np.array([d[2] for d in batchData])
-        next_states = np.array([d[3] for d in batchData])
-        dones = np.array([d[4] for d in batchData])
-        y = self.q(states).numpy()
-        q = self.targetQ(next_states).numpy()
-        for i, (_, action, reward, _, done) in enumerate(batchData):
-            target = reward
-            if not done:
-                target += self.gamma * np.amax(q[i])
-            y[i][action] = target
-        return states, y
-    
-    def StepTrain(self, X, Y):
-        optimizer = tf.keras.optimizers.Adam(learning_rate=self.current_lr) 
-        mse = tf.keras.losses.MeanSquaredError()
-        with tf.GradientTape() as tape:
-            y_pred = self.q(X)
-            loss = mse(y_true=Y, y_pred=y_pred)      
-            grads = tape.gradient(loss, self.q.variables)
-            optimizer.apply_gradients(grads_and_vars=zip(grads, self.q.variables))
-    
     def Optimize(self, batchData):
         states = np.array([d[0] for d in batchData])
         actions = np.array([d[1] for d in batchData])
         rewards = np.array([d[2] for d in batchData])
         next_states = np.array([d[3] for d in batchData])
         dones = np.array([d[4] for d in batchData])
-        y = self.q(states).numpy()
-        predict = y
-        q = self.targetQ(next_states).numpy()
-        q_batch = np.max(q, axis=1).flatten()
-        indices = (np.arange(self.batchSize), actions)
-        y[indices] = rewards + (1 - dones) * 0.99 * q_batch
-        self.q.train_on_batch(states.astype(np.float32), y.astype(np.float32))
-
-    def Optimize2(self, batchData):
-        states = np.array([d[0] for d in batchData])
-        actions = np.array([d[1] for d in batchData])
-        rewards = np.array([d[2] for d in batchData])
-        next_states = np.array([d[3] for d in batchData])
-        dones = np.array([d[4] for d in batchData])
-        optimizer = tf.keras.optimizers.Adam(learning_rate=self.current_lr) 
+        optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr) 
         with tf.GradientTape() as tape:
             model_output = self.q(states)
             target_output = self.targetQ(next_states)
-            predicted_q_value = tf.gather_nd(model_output, tf.expand_dims(actions, 1), 1)
+            model_output = tf.gather_nd(model_output, tf.expand_dims(actions, 1), 1)
             next_state_values = tf.math.reduce_max(target_output, axis = 1)
             expected_q_values = ((1 - dones) * next_state_values * 0.99) + rewards
-            loss = self.loss(expected_q_values, predicted_q_value)    
+            loss = self.loss(expected_q_values, model_output)    
             grads = tape.gradient(loss, self.q.variables)
+            print(grads)
             optimizer.apply_gradients(grads_and_vars=zip(grads, self.q.variables))
 
     def Episode(self, episode):
@@ -134,14 +98,17 @@ class DeepQlearning:
             st = st1
             if episode > self.config.warm_up:
                 self.UpdateLearningRate(episode - self.config.warm_up + 1)
-
             if self.buffer.GetLength() > self.batchSize:
                 X = self.buffer.GetBatchData(self.batchSize)
-                self.Optimize2(X)
+                self.Optimize(X)
                 cStep += 1
             if cStep % self.updateRate == 0:
                 self.UpdateTargetNetwork()
         self.history.AddHistory([episode, reward_sum, action_nums, self.epsilon])
+    
+    def LoadParameter(self):
+        self.q(10)
+        self.q.load_weights(f'weight/{self.config.loadName}.h5')
     
     def Train(self):
         startTime = time.time()
@@ -151,7 +118,7 @@ class DeepQlearning:
         for i in range(total):
             self.Episode(i)
             self.UpdateEpsilon(i)
-            if i%999 == 0:
+            if i%10 == 0:
                 self.q.save_weights(f'weight/{self.config.name}.h5')
             pBar.update(int((j / (total - 1)) * 100))
             j += 1
@@ -159,10 +126,6 @@ class DeepQlearning:
         print(f'cost time: {round(time.time() - startTime,3)} sec')
         self.history.ShowHistory(f'figure/{self.config.name}.png')
         
-    def LoadParameter(self):
-        self.q(10)
-        self.q.load_weights(f'weight/{self.config.loadName}.h5')
-    
     def play(self):
         print('start play...')
         observation = self.env.reset()
