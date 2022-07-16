@@ -40,6 +40,7 @@ class DeepQlearning:
         self.history = History()
         self.loss = self.GetLossFunction()
         self.rng = np.random.default_rng(100)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr) 
         
     #跟據state, epsilon以及給定的model來決定action
     def GetModelAction(self, _model, _st,_epsilon):
@@ -70,6 +71,7 @@ class DeepQlearning:
         base = self.lr_min
         rate = self.lr_decay
         self.lr = base + delta * np.exp(-episode / rate)
+        self.optimizer.learning_rate.assign(self.lr)
 
     ##根據目前的episode調整epsilon
     def UpdateEpsilon(self,episode):
@@ -84,7 +86,6 @@ class DeepQlearning:
         rewards = np.array([d[2] for d in batchData])
         next_states = np.array([d[3] for d in batchData])
         dones = np.array([d[4] for d in batchData])
-        optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr) 
         with tf.GradientTape() as tape:
             model_output = self.q(states)
             target_output = self.targetQ(next_states)
@@ -93,7 +94,7 @@ class DeepQlearning:
             expected_q_values = ((1 - dones) * next_state_values * self.gamma) + rewards
             loss = self.loss(expected_q_values, model_output)    
             grads = tape.gradient(loss, self.q.variables)
-            optimizer.apply_gradients(grads_and_vars=zip(grads, self.q.variables))
+            self.optimizer.apply_gradients(grads_and_vars=zip(grads, self.q.variables))
 
     #每一回合遊戲過程
     def Episode(self, episode):
