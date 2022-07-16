@@ -30,12 +30,23 @@ class DeepQlearning:
         self.lr_decay = _config.lr_decay
         self.max_queue = _config.max_queue
         self.batchSize = _config.batchSize
-        self.q = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
-        self.targetQ = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        #self.q = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        #self.targetQ = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        self.q = self.GetQModel()
+        self.targetQ = self.GetQModel()
         self.buffer = ReplayBuffer(self.max_queue)
         self.history = History()
         self.loss = self.GetLossFunction()
         self.UpdateTargetNetwork()
+
+    def GetQModel(self):
+        model = Sequential()
+        moedl.add(Embedding(500, 4, input_length=1))
+        model.add(Reshape((4,)))
+        model.add(Dense(50, activation='relu'))
+        model.add(Dense(50, activation='relu'))
+        model.add(Dense(6, activation='linear'))
+        return model
 
     #根據config來決定loss function
     def GetLossFunction(self):

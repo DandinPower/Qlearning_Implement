@@ -27,8 +27,10 @@ class QModel(tf.keras.Model):
     def call(self, inputs):
         x = self.embedding(inputs)
         x = tf.expand_dims(x, 0)
+        
         x = self.dense1(x)
         x = self.relu(x)
+        print(x)
         x = self.dense2(x)
         x = self.relu(x)
         x = self.action(x)
@@ -69,12 +71,14 @@ if __name__ == '__main__':
     q = QModel(500, 4, 6, 50)
     target = QModel(500, 4, 6, 50)
     #print(q.trainable_weights)
+    
+    #q.save_weights('test.h5')
     q(10)
-    q.save_weights('test.h5')
-    #q.load_weights(f'weight/good_v2.h5')
+    q.load_weights(f'weight/good_v2.h5')
+    q(100)
     #print(states)
     #print(q.variables)
-    #print(q(states))
+    #print(q(42))
     #print(q.GetAction(400, 1))
     '''
     lossF = tf.keras.losses.Huber()
