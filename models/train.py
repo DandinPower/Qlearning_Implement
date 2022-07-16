@@ -5,6 +5,8 @@ from .draw import History
 from .config import Config
 import tensorflow as tf 
 from tensorflow.keras import backend as K
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Embedding, Reshape
 import numpy as np 
 import random 
 import gym
