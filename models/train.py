@@ -61,9 +61,10 @@ class DeepQlearning:
 
     #將model複製給target model
     def UpdateTargetNetwork(self):
-        self.targetQ(0)
-        self.q(0)
-        self.targetQ.Copy(self.q)
+        self.targetQ(np.array([0]))
+        self.q(np.array([0]))
+        self.targetQ.set_weights(self.q.get_weights())
+        #self.targetQ.Copy(self.q)
     
     #根據目前的episode調整leaning_rate
     def UpdateLearningRate(self, episode):
