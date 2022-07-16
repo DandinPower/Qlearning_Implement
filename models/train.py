@@ -43,7 +43,7 @@ class DeepQlearning:
 
     def GetQModel(self):
         model = Sequential()
-        moedl.add(Embedding(500, 4, input_length=1))
+        model.add(Embedding(500, 4, input_length=1))
         model.add(Reshape((4,)))
         model.add(Dense(50, activation='relu'))
         model.add(Dense(50, activation='relu'))
