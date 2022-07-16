@@ -1,12 +1,12 @@
+from tensorflow.keras import backend as K
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Embedding, Reshape
 from progressbar import ProgressBar
 from .q_model import QModel
 from .buffer import ReplayBuffer
 from .draw import History
 from .config import Config
 import tensorflow as tf 
-from tensorflow.keras import backend as K
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Embedding, Reshape
 import numpy as np 
 import random 
 import gym
@@ -35,23 +35,14 @@ class DeepQlearning:
         self.batchSize = _config.batchSize
         self.q = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
         self.targetQ = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
-        #self.q = self.GetQModel()
-        #self.targetQ = self.GetQModel()
+        self.UpdateTargetNetwork()
         self.buffer = ReplayBuffer(self.max_queue)
         self.history = History()
-        self.rng = np.random.default_rng(100)
         self.loss = self.GetLossFunction()
-        self.UpdateTargetNetwork()
-
-    def GetQModel(self):
-        model = Sequential()
-        model.add(Embedding(500, 4, input_length=1))
-        model.add(Reshape((4,)))
-        model.add(Dense(50, activation='relu'))
-        model.add(Dense(50, activation='relu'))
-        model.add(Dense(6, activation='linear'))
-        return model
+        self.rng = np.random.default_rng(100)
+        
     
+    #跟據state, epsilon以及給定的model來決定action
     def GetModelAction(self, _model, _st,_epsilon):
         if self.rng.uniform() < _epsilon:
             return self.env.action_space.sample()
@@ -73,7 +64,6 @@ class DeepQlearning:
         self.targetQ(np.array([0]))
         self.q(np.array([0]))
         self.targetQ.set_weights(self.q.get_weights())
-        #self.targetQ.Copy(self.q)
     
     #根據目前的episode調整leaning_rate
     def UpdateLearningRate(self, episode):
@@ -124,8 +114,6 @@ class DeepQlearning:
                 X = self.buffer.GetBatchData(self.batchSize)
                 self.Optimize(X)
                 cStep += 1
-            if cStep % self.updateRate == 0:
-                self.UpdateTargetNetwork()
         self.history.AddHistory([episode, reward_sum, action_nums, self.epsilon])
     
     def LoadParameter(self):
@@ -140,6 +128,8 @@ class DeepQlearning:
         for i in range(total):
             self.Episode(i)
             self.UpdateEpsilon(i)
+            if i % self.updateRate == 0:
+                self.UpdateTargetNetwork()
             if i%999 == 0:
                 self.q.save_weights(f'weight/{self.config.name}.h5')
             pBar.update(int((j / (total - 1)) * 100))

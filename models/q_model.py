@@ -46,6 +46,15 @@ class QModel(tf.keras.Model):
             q_values = self.call(int(st))
             return np.argmax(q_values)
 
+def GetQModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize):
+    model = Sequential()
+    model.add(Embedding(_stateNum, _embeddingSize, input_length=1))
+    model.add(Reshape((_embeddingSize,)))
+    model.add(Dense(_hiddenSize, activation='relu'))
+    model.add(Dense(_hiddenSize, activation='relu'))
+    model.add(Dense(_actionNum, activation='linear'))
+    return model
+
 if __name__ == '__main__':
 
     q = Sequential()
