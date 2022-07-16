@@ -18,6 +18,7 @@ class DeepQlearning:
         self.config = _config
         self.episodes = _config.episodes
         self.env = gym.make(_config.gym)
+        self.env.seed(100)
         self.env._max_episode_steps = _config.max_episode_steps
         self.epsilon = _config.epsilon
         self.epsilon_max = self.epsilon
@@ -32,10 +33,10 @@ class DeepQlearning:
         self.lr_decay = _config.lr_decay
         self.max_queue = _config.max_queue
         self.batchSize = _config.batchSize
-        #self.q = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
-        #self.targetQ = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
-        self.q = self.GetQModel()
-        self.targetQ = self.GetQModel()
+        self.q = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        self.targetQ = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        #self.q = self.GetQModel()
+        #self.targetQ = self.GetQModel()
         self.buffer = ReplayBuffer(self.max_queue)
         self.history = History()
         self.rng = np.random.default_rng(100)
@@ -170,6 +171,36 @@ class DeepQlearning:
                 count = 0
                 observation = self.env.reset()   
         self.env.close()
+
+    def RandomPlay(self, nums):
+        rewards = []
+        steps = []
+        for i in range(nums):
+            observation = self.env.reset()
+            count = 0
+            reward_sum = 0
+            random_episodes = 0
+            while random_episodes < 1:
+                #self.env.render()
+                #time.sleep(0.5)
+                x = observation
+                action = self.env.action_space.sample()
+                observation, reward, done, _ = self.env.step(action)
+                print(f'state: {x}, action: {action}, reward: {reward}')
+                count += 1
+                reward_sum += reward
+                if done:
+                    rewards.append(reward_sum)
+                    steps.append(count)
+                    print("Reward for this episode was: {}, turns was: {}".format(reward_sum, count))
+                    random_episodes += 1
+                    reward_sum = 0
+                    count = 0
+                    observation = self.env.reset()   
+        print(rewards)
+        print(steps)
+
+        #self.env.close()
 
 if __name__ == '__main__':
     '''
