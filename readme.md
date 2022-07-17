@@ -213,5 +213,5 @@
 ![big_model_test.png](image/big_model_test.png) ![big_model_test.png](image/big_model_test.png) ![big_model_test.png](image/big_model_test.png)
 
 <center class="half">
-    <img src = "image/big_model_test.png" width="100"/>
+    <img src = "image/big_model_test.png" width="400"/><img src = "image/big_model_test.png" width="400"/><img src = "image/big_model_test.png" width="400"/>
 </center>
