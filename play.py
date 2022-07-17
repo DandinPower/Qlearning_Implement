@@ -1,4 +1,4 @@
-from models.train import DeepQlearning
+from models.agent import DeepQlearning
 from models.config import Config
 import numpy as np 
 import random
@@ -9,6 +9,5 @@ import time
 config = Config()
 dpq = DeepQlearning(config)
 dpq.LoadParameter()
-#dpq.Train()
 dpq.play()
 #dpq.RandomPlay(30)

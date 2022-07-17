@@ -35,6 +35,32 @@ class QModel(tf.keras.Model):
         x = tf.squeeze(x)
         return x
 
+class QModelLarge(tf.keras.Model):
+    def __init__(self, _stateNum, _embeddingSize, _actionNum, _hiddenSize):
+        super(QModel, self).__init__()
+        self.embedding = tf.keras.layers.Embedding(input_dim = _stateNum, output_dim = _embeddingSize)
+        self.dense1 = LinearLayer(_embeddingSize, _hiddenSize)
+        self.dense2 = LinearLayer(_hiddenSize, _hiddenSize)
+        self.dense3 = LinearLayer(_hiddenSize, _hiddenSize)
+        self.dense4 = LinearLayer(_hiddenSize, int(_hiddenSize / 2))
+        self.action = LinearLayer(int(_hiddenSize / 2), _actionNum)
+        self.relu = tf.keras.layers.ReLU()
+        
+    def call(self, inputs):
+        x = self.embedding(inputs)
+        x = tf.expand_dims(x, 0)
+        x = self.dense1(x)
+        x = self.relu(x)
+        x = self.dense2(x)
+        x = self.relu(x)
+        x = self.dense3(x)
+        x = self.relu(x)
+        x = self.dense4(x)
+        x = self.relu(x)
+        x = self.action(x)
+        x = tf.squeeze(x)
+        return x
+
 #回傳用keras sequential製作的模型
 def GetQModel(_stateNum, _embeddingSize, _actionNum, _hiddenSize):
     model = Sequential()
