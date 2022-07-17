@@ -203,16 +203,12 @@
     - 較快的收斂 反而可以運算比較少步導致更快
 
 ### 三者比較
-
-- 表格
-
-    |  | parameters | cost times | 收斂需要的份數 | 收斂過程的variance |
-    | --- | --- | --- | --- | --- |
-    | small | 2931 | 3459 | ~4000 | 大 |
-    | medium | 5106 | 2723 | ~1700 | 中 |
-    | large | 21556 | 3042 | ~2000 | 小 |
+|  | parameters | cost times | 收斂需要的份數 | 收斂過程的variance |
+| --- | --- | --- | --- | --- |
+| small | 2931 | 3459 | ~4000 | 大 |
+| medium | 5106 | 2723 | ~1700 | 中 |
+| large | 21556 | 3042 | ~2000 | 小 |
 
 ### 比較圖
 
-- 小  中 大
-    ![big_model_test.png](image/comparison.jpg)
+![big_model_test.png](image/comparison.jpg)
