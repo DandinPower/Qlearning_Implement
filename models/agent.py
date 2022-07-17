@@ -142,7 +142,6 @@ class DeepQlearning:
             #每999個episode就存一次模型參數
             if i%999 == 0:
                 self.q.save_weights(f'weight/{self.config.name}.h5')
-            j += 1
             self.last_episode = i
             N = min(10, len(self.history.actions))
             progress_bar.set_postfix({
