@@ -204,13 +204,15 @@
 
 ### 三者比較
 
-|  | parameters | cost times | 收斂需要的份數 | 收斂過程的variance |
-| --- | --- | --- | --- | --- |
-| small | 2931 | 3459 | ~4000 | 大 |
-| medium | 5106 | 2723 | ~1700 | 中 |
-| large | 21556 | 3042 | ~2000 | 小 |
+- 表格
+
+    |  | parameters | cost times | 收斂需要的份數 | 收斂過程的variance |
+    | --- | --- | --- | --- | --- |
+    | small | 2931 | 3459 | ~4000 | 大 |
+    | medium | 5106 | 2723 | ~1700 | 中 |
+    | large | 21556 | 3042 | ~2000 | 小 |
 
 ### 比較圖
-<center class="half" >
-    <img src = "image/little_model_test.png" width="205" style="padding: 5px"/><img src = "image/medium_model_test.png" width="205" style="padding: 5px"/><img src = "image/big_model_test.png" width="205" style="padding: 5px"/>
-</center>
+
+- 小  中 大
+    ![big_model_test.png](image/comparison.jpg)
