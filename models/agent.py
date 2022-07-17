@@ -33,10 +33,10 @@ class DeepQlearning:
         self.lr_decay = _config.lr_decay
         self.max_queue = _config.max_queue
         self.batchSize = _config.batchSize
-        #self.q = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
-        #self.targetQ = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
-        self.q = QModelLarge(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
-        self.targetQ = QModelLarge(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        self.q = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        self.targetQ = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        #self.q = QModelLarge(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        #self.targetQ = QModelLarge(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
         self.UpdateTargetNetwork()
         self.buffer = ReplayBuffer(self.max_queue)
         self.history = History()
