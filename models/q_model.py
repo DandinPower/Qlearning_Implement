@@ -41,8 +41,7 @@ class QModelLarge(tf.keras.Model):
         self.embedding = tf.keras.layers.Embedding(input_dim = _stateNum, output_dim = _embeddingSize)
         self.dense1 = LinearLayer(_embeddingSize, _hiddenSize)
         self.dense2 = LinearLayer(_hiddenSize, _hiddenSize)
-        self.dense3 = LinearLayer(_hiddenSize, _hiddenSize)
-        self.dense4 = LinearLayer(_hiddenSize, int(_hiddenSize / 2))
+        self.dense3 = LinearLayer(_hiddenSize, int(_hiddenSize / 2))
         self.action = LinearLayer(int(_hiddenSize / 2), _actionNum)
         self.relu = tf.keras.layers.ReLU()
         
@@ -54,8 +53,6 @@ class QModelLarge(tf.keras.Model):
         x = self.dense2(x)
         x = self.relu(x)
         x = self.dense3(x)
-        x = self.relu(x)
-        x = self.dense4(x)
         x = self.relu(x)
         x = self.action(x)
         x = tf.squeeze(x)
