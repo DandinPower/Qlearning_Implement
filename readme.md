@@ -211,3 +211,7 @@
 | large | 21556 | 3042 | ~2000 | 小 |
 
 ![big_model_test.png](image/big_model_test.png) ![big_model_test.png](image/big_model_test.png) ![big_model_test.png](image/big_model_test.png)
+
+<center class="half">
+    <img src = "image/big_model_test.png" width="100"/>
+</center>
