@@ -37,7 +37,7 @@ class QModel(tf.keras.Model):
 
 class QModelLarge(tf.keras.Model):
     def __init__(self, _stateNum, _embeddingSize, _actionNum, _hiddenSize):
-        super(QModel, self).__init__()
+        super(QModelLarge, self).__init__()
         self.embedding = tf.keras.layers.Embedding(input_dim = _stateNum, output_dim = _embeddingSize)
         self.dense1 = LinearLayer(_embeddingSize, _hiddenSize)
         self.dense2 = LinearLayer(_hiddenSize, _hiddenSize)
