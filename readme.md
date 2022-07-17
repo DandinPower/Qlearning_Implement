@@ -210,8 +210,7 @@
 | medium | 5106 | 2723 | ~1700 | 中 |
 | large | 21556 | 3042 | ~2000 | 小 |
 
-![big_model_test.png](image/big_model_test.png) ![big_model_test.png](image/big_model_test.png) ![big_model_test.png](image/big_model_test.png)
-
-<center class="half">
-    <img src = "image/big_model_test.png" width="400"/><img src = "image/big_model_test.png" width="400"/><img src = "image/big_model_test.png" width="400"/>
+### 比較圖
+<center class="half" >
+    <img src = "image/little_model_test.png" width="205" style="padding: 5px"/><img src = "image/medium_model_test.png" width="205" style="padding: 5px"/><img src = "image/big_model_test.png" width="205" style="padding: 5px"/>
 </center>
