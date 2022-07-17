@@ -1,8 +1,8 @@
 from tensorflow.keras import backend as K
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Embedding, Reshape
-from progressbar import ProgressBar
-from .q_model import QModel
+from tqdm import trange
+from .q_model import QModel, QModelLarge
 from .buffer import ReplayBuffer
 from .draw import History
 from .config import Config
@@ -33,8 +33,10 @@ class DeepQlearning:
         self.lr_decay = _config.lr_decay
         self.max_queue = _config.max_queue
         self.batchSize = _config.batchSize
-        self.q = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
-        self.targetQ = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        #self.q = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        #self.targetQ = QModel(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        self.q = QModelLarge(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
+        self.targetQ = QModelLarge(_config.stateNum, _config.embeddingSize, _config.actionNum, _config.hiddenSize)
         self.UpdateTargetNetwork()
         self.buffer = ReplayBuffer(self.max_queue)
         self.history = History()
@@ -125,10 +127,10 @@ class DeepQlearning:
     #訓練模型
     def Train(self):
         startTime = time.time()
-        j = 0
         total = self.episodes
-        pBar = ProgressBar().start()
-        for i in range(total):
+        self.last_episode = 0
+        progress_bar = trange(0, total, initial = self.last_episode, total = total)
+        for i in progress_bar:
             self.Episode(i)
             self.UpdateEpsilon(i)
             #每update rate次episodes就更新一次target model
@@ -140,9 +142,14 @@ class DeepQlearning:
             #每999個episode就存一次模型參數
             if i%999 == 0:
                 self.q.save_weights(f'weight/{self.config.name}.h5')
-            pBar.update(int((j / (total - 1)) * 100))
             j += 1
-        pBar.finish()
+            self.last_episode = i
+            N = min(10, len(self.history.actions))
+            progress_bar.set_postfix({
+                            "reward": np.mean(self.history.rewards[-N:]),
+                            "steps": np.mean(self.history.actions[-N:]),
+                            "epsilon": self.epsilon
+                            })
         print(f'cost time: {round(time.time() - startTime,3)} sec')
         self.history.ShowHistory(f'figure/{self.config.name}.png')
         
@@ -199,7 +206,6 @@ class DeepQlearning:
                     observation = self.env.reset()   
         print(rewards)
         print(steps)
-
         #self.env.close()
 
 #測試用
